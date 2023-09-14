@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using FocusGroupOrder.Views;
 using Xamarin.CommunityToolkit.ObjectModel;
+using System.Linq;
 
 namespace FocusGroupOrder.ViewModels
 {
@@ -30,6 +31,27 @@ namespace FocusGroupOrder.ViewModels
             set { SetProperty(ref _otherEmail, value); }
         }
 
+
+        bool _IsUserLoggedIn;
+        /// <summary>
+        /// will login once user 'Add Me' when creating/editing an order
+        /// </summary>
+        public bool IsUserLoggedIn
+        {
+            get { return _IsUserLoggedIn; }
+            set { ShowLoginPanel = !value; SetProperty(ref _IsUserLoggedIn, value); }
+        }
+
+        bool _ShowLoginPanel = true;
+        /// <summary>
+        /// will login once user 'Add Me' when creating/editing an order
+        /// </summary>
+        public bool ShowLoginPanel
+        {
+            get { return _ShowLoginPanel; }
+            set { SetProperty(ref _ShowLoginPanel, value); }
+        }
+
         public ObservableRangeCollection<GroupOrderUserViewModel> Users { get; set; } = new ObservableRangeCollection<GroupOrderUserViewModel>();
 
         public IAsyncCommand CommandStartOrder { private set; get; }
@@ -38,49 +60,19 @@ namespace FocusGroupOrder.ViewModels
 
         public CreateOrderViewModel()
         {
-            CommandStartOrder = CommandFactory.Create(async () => await StartOrder());
-            CommandAddMyself = CommandFactory.Create(() => AddMyself());
-            CommandAddOtherUser = CommandFactory.Create(() => AddOtherUser());
-
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-            //Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
+            CommandStartOrder = CommandFactory.Create(StartOrder);
+            CommandAddMyself = CommandFactory.Create(AddMyself);
+            CommandAddOtherUser = CommandFactory.Create(AddOtherUser);
         }
 
+        /// <summary>
+        /// test method
+        /// </summary>
         public void LoadUsers()
         {
             //todo: auto-load current user email! from secure storage
             try
             {
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
-                Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
                 Users.Add(new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = "support@beskush.com" });
             }
             catch { }
@@ -92,8 +84,16 @@ namespace FocusGroupOrder.ViewModels
             try
             {
                 IsBusy = true;
-                await App.Current.MainPage.Navigation.PushAsync(new EditGroupOrderPage());
-                //await ((AppShell)Application.Current.MainPage).GoToAsync("..");
+                var success = await CreateNewOrder(new NewOrder
+                {
+                    CreatorEmail = CreatorEmail,
+                    otherUsersEmails = Users.Count > 0 && Users.Any(z => z.Email.Trim().ToLower() != CreatorEmail.Trim().ToLower()) ?
+                    Users.Where(z => z.Email.Trim().ToLower() != CreatorEmail.Trim().ToLower()).Select(z => z.Email).ToList() : new List<string>()
+                });
+                if(success.success)
+                    await App.Current.MainPage.Navigation.PushAsync(new EditGroupOrderPage(new Order { OrderId = success.orderId }));
+                else
+                    await App.Current.MainPage.DisplayAlert("error", "an error occurred on the server. please try again.", "OK");
             }
             catch { } //todo: appcenter tracking on errors
             finally
@@ -102,13 +102,37 @@ namespace FocusGroupOrder.ViewModels
             }
         }
 
-        void AddMyself()
+        async Task AddMyself()
         {
             try
             {
                 IsBusy = true;
-                //todo: validate
+                //todo: stronger validation that this is an email, this will do for a coding challenge demonstration
+                if(string.IsNullOrWhiteSpace(CreatorEmail) || !CreatorEmail.Contains("@") || !CreatorEmail.Contains("."))
+                {
+                    await App.Current.MainPage.DisplayAlert("error", "not a valid email. please try again.", "OK");
+                    return;
+                }
+
                 Users.Insert(0, new GroupOrderUserViewModel { IsCreatorOfGroup = true, Email = CreatorEmail, TextColor = Xamarin.Forms.Color.Purple });
+
+                //get all orders for this user from cloud now!
+                var sytemProducts = await GetProducts();
+
+                var myUserSession = await GetAllOrdersForUser(CreatorEmail.Trim().ToLower());
+
+                //todo: if has an open order, then open EDIT order PAGE... or show progress at least
+                if (myUserSession != null && myUserSession.Orders.Count > 0 && myUserSession.Orders.Any(Z => Z.IsComplete != true))
+                {
+                    //todo: fix this limitation
+                    //if there are any open orders, whether you created it or not, you can only view/edit your current order
+                    await App.Current.MainPage.Navigation.PushAsync(new EditGroupOrderPage(new Order { OrderId = myUserSession.Orders.First(Z => Z.IsComplete != true).OrderId })); 
+                }
+                else
+                {
+                    //create a new order, this user is the creator of that order
+                    IsUserLoggedIn = true;
+                }
             }
             catch { } //todo: appcenter tracking on errors
             finally
@@ -117,11 +141,16 @@ namespace FocusGroupOrder.ViewModels
             }
         }
 
-        void AddOtherUser()
+        async Task AddOtherUser()
         {
             try
             {
                 IsBusy = true;
+                if (string.IsNullOrWhiteSpace(CreatorEmail) || !CreatorEmail.Contains("@") || !CreatorEmail.Contains("."))
+                {
+                    await App.Current.MainPage.DisplayAlert("error", "not a valid email. please try again.", "OK");
+                    return;
+                }
                 //todo: validate
                 Users.Add(new GroupOrderUserViewModel { Email = OtherEmail });
             }

@@ -47,9 +47,8 @@ public class GroupOrderController : ControllerBase
     {
         try
         {
-            //return Ok(await repo.CreateNewOrder(param));
             var x = await repo.CreateNewOrder(param);
-            return Ok(new UpdateDto { success = x.success, error = x.error });
+            return Ok(new UpdateDto { success = x.success, error = x.error, orderId = x.orderId });
         }
         catch(Exception ex)
         {
@@ -141,7 +140,7 @@ public class GroupOrderController : ControllerBase
 
         public bool success { get; set; }
         public string error { get; set; }
-
+        public int orderId { get; set; }
     }
 
     public class UserDto

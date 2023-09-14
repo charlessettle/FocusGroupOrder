@@ -17,7 +17,7 @@ namespace FocusGroupOrder.ViewModels
             set { SetProperty(ref _itemName, value); }
         }
 
-        string _imageUrl = "https://recipetineats.com/wp-content/uploads/2018/06/Quesadillas_4.jpg";
+        string _imageUrl;
         public string ImageUrl
         {
             get { return _imageUrl; }
@@ -40,5 +40,7 @@ namespace FocusGroupOrder.ViewModels
             get { return _price; }
             set { SetProperty(ref _price, value); }
         }
+
+        public string PriceDisplay => Price.ToString("c");
     }
 }

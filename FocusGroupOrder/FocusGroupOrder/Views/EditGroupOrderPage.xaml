@@ -7,9 +7,9 @@
     <ContentPage.BindingContext>
         <viewmodels:UserOrderViewModel/>
     </ContentPage.BindingContext>
-    <Grid RowDefinitions="10*, 2*">
+    <Grid RowDefinitions="10*, 5*">
         <Grid RowDefinitions="*, Auto">
-        <CarouselView ItemsSource="{Binding Items}" IndicatorView="indicatorView"
+        <CarouselView ItemsSource="{Binding Items}" IndicatorView="indicatorView" CurrentItemChanged="CarouselView_CurrentItemChanged"
                       Position="{Binding Position}">
             <CarouselView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:OrderItemViewModel">
@@ -17,21 +17,19 @@
                         <Frame HasShadow="True"
                                BorderColor="DarkGray"
                                CornerRadius="15"
-                               HeightRequest="500"
                                HorizontalOptions="CenterAndExpand"
                                VerticalOptions="CenterAndExpand">
                             <StackLayout>
                                 <Image Source="{Binding ImageUrl}"
                                        Aspect="AspectFill"
-                                       HeightRequest="150"
-                                       WidthRequest="150"
-                                       HorizontalOptions="Center" />
+                                       HorizontalOptions="FillAndExpand"
+                                       VerticalOptions="FillAndExpand" />
                                  <Label Text="{Binding ItemName}"
                                        FontAttributes="Bold"
                                        FontSize="Large"
                                        HorizontalOptions="Center"
                                        VerticalOptions="Center" />
-                                <Label Text="{Binding Price}" FontAttributes="Bold"
+                                <Label Text="{Binding PriceDisplay}" FontAttributes="Bold"
                                        HorizontalOptions="Center" />
                             </StackLayout>
                         </Frame>
@@ -44,13 +42,16 @@
                    SelectedIndicatorColor="ForestGreen"
                    HorizontalOptions="Center" />
             </Grid>
-        <Grid Grid.Row="1" HorizontalOptions="Center" RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, Auto">
+        <Grid Grid.Row="1" HorizontalOptions="Center" RowDefinitions="Auto, Auto, Auto, *" ColumnDefinitions="Auto, Auto">
 
             <Label Grid.Column="0">
                 <Label.FormattedText>
                       <FormattedString>
-                        <Span Text="How Many? " FontSize="Large"/>
+                        <Span Text="How Many " FontSize="Large"/>
+                          <Span Text="{Binding CurrentItemDisplayed, Mode=TwoWay}" FontSize="Large" TextColor="Purple"/>
+                          <Span Text="? " FontSize="Large"/>
                         <Span Text="{Binding HowMany, Mode=TwoWay}" FontSize="Large" TextColor="Purple"/>
+
                     </FormattedString>
                 </Label.FormattedText>
 
@@ -60,12 +61,13 @@
                  HorizontalOptions="Center" Value="{Binding HowMany}"
                  />
 
-            <Button TextTransform="Uppercase" VerticalOptions="Center" Grid.ColumnSpan="2" Padding="0,10,0,0" Text="{Binding BtnAddText, Mode=TwoWay}" Grid.Row="1" >
+            <Button Command="{Binding CommandAddItemToOrder}" TextTransform="Uppercase" VerticalOptions="Center" Grid.ColumnSpan="2" Padding="0,10,0,0" Text="{Binding BtnAddText, Mode=TwoWay}" Grid.Row="1" >
 
             </Button>
+            <Label Text="{Binding OrderSummary, Mode=TwoWay}" FontSize="Micro" Grid.Row="2"/>
+            <Button TextTransform="Uppercase" VerticalOptions="EndAndExpand" Grid.ColumnSpan="2" Text="COMPLETE ORDER" Grid.Row="3" Command="{Binding CommandFinishOrder}" />
         </Grid>
-       
-
+        <ActivityIndicator HeightRequest="200" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy, Mode=TwoWay}" Grid.RowSpan="2" />
     </Grid>
 </ContentPage>
 

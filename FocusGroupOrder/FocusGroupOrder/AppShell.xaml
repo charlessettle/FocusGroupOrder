@@ -85,7 +85,7 @@
     <FlyoutItem FlyoutDisplayOptions="AsMultipleItems">
          <ShellContent Route="CreateGroupOrder" Title="Order" ContentTemplate="{DataTemplate local:CreateGroupOrderPage}" />
         <!--<ShellContent Route="EditGroupOrder" Title="Edit" ContentTemplate="{DataTemplate local:CreateGroupOrderPage}" />-->
-         <ShellContent Route="GroupOrderSummary" Title="summary" ContentTemplate="{DataTemplate local:GroupOrderSummaryPage}" />
+         <!--<ShellContent Route="GroupOrderSummary" Title="summary" ContentTemplate="{DataTemplate local:GroupOrderSummaryPage}" />-->
          <!--<ShellContent Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
         <ShellContent Route="ItemsPage" ContentTemplate="{DataTemplate local:ItemsPage}" />-->
     </FlyoutItem>

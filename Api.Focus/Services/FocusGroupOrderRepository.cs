@@ -25,6 +25,8 @@ namespace Api.Focus.Services
                 if (string.IsNullOrWhiteSpace(newOrder.CreatorEmail))
                     throw new Exception("missing user email");
 
+                newOrder.CreatorEmail = newOrder.CreatorEmail.Trim().ToLower();
+
                 var usersForThisOrderInDb = await context.Users.Where(z => z.Email == newOrder.CreatorEmail
                 || newOrder.otherUsersEmails.Any(e => e == z.Email.ToLower())).ToListAsync();
 
@@ -36,11 +38,14 @@ namespace Api.Focus.Services
 
                 List<User> otherUsersToAddToDb = new List<User>();
                 //for all other users, create new users as needed
+                List<string> alreadyAdded = new List<string>(); //avoid duplicates
                 foreach(string obj in newOrder.otherUsersEmails)
                 {
-                    if(!string.IsNullOrWhiteSpace(obj) && !usersForThisOrderInDb.Any(z => z.Email == obj))
+                    if(!string.IsNullOrWhiteSpace(obj) && !usersForThisOrderInDb.Any(z => z.Email == obj)
+                        && !alreadyAdded.Any(z => z == obj))
                     {
                         otherUsersToAddToDb.Add(new User { Email = obj.Trim().ToLower() });
+                        alreadyAdded.Add(obj.Trim().ToLower());
                     }
                 }
                 if(otherUsersToAddToDb.Count > 0)

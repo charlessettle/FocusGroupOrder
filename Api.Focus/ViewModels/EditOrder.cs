@@ -19,6 +19,7 @@ namespace Api.Focus.ViewModels
 
 		public bool IsComplete { get; set; }
 
+		public int CreatorId { get; set; }
     }
 
     public class LineItem
