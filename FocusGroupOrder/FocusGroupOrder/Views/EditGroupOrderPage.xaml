@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" Title="Edit Group Order"
+     xmlns:viewmodels="clr-namespace:FocusGroupOrder.ViewModels"
+    x:Class="FocusGroupOrder.Views.EditGroupOrderPage">
+    <ContentPage.BindingContext>
+        <viewmodels:UserOrderViewModel/>
+    </ContentPage.BindingContext>
+    <Grid RowDefinitions="10*, 2*">
+        <Grid RowDefinitions="*, Auto">
+        <CarouselView ItemsSource="{Binding Items}" IndicatorView="indicatorView"
+                      Position="{Binding Position}">
+            <CarouselView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:OrderItemViewModel">
+                    <StackLayout>
+                        <Frame HasShadow="True"
+                               BorderColor="DarkGray"
+                               CornerRadius="15"
+                               HeightRequest="500"
+                               HorizontalOptions="CenterAndExpand"
+                               VerticalOptions="CenterAndExpand">
+                            <StackLayout>
+                                <Image Source="{Binding ImageUrl}"
+                                       Aspect="AspectFill"
+                                       HeightRequest="150"
+                                       WidthRequest="150"
+                                       HorizontalOptions="Center" />
+                                 <Label Text="{Binding ItemName}"
+                                       FontAttributes="Bold"
+                                       FontSize="Large"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                                <Label Text="{Binding Price}" FontAttributes="Bold"
+                                       HorizontalOptions="Center" />
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>
+                </DataTemplate>
+    </CarouselView.ItemTemplate>
+        </CarouselView>
+         <IndicatorView Grid.Row="1" x:Name="indicatorView"
+                   IndicatorColor="DarkGray"
+                   SelectedIndicatorColor="ForestGreen"
+                   HorizontalOptions="Center" />
+            </Grid>
+        <Grid Grid.Row="1" HorizontalOptions="Center" RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, Auto">
+
+            <Label Grid.Column="0">
+                <Label.FormattedText>
+                      <FormattedString>
+                        <Span Text="How Many? " FontSize="Large"/>
+                        <Span Text="{Binding HowMany, Mode=TwoWay}" FontSize="Large" TextColor="Purple"/>
+                    </FormattedString>
+                </Label.FormattedText>
+
+            </Label>
+               <Stepper Maximum="5" Grid.Column="1"
+                 Increment="1" Minimum="1"
+                 HorizontalOptions="Center" Value="{Binding HowMany}"
+                 />
+
+            <Button TextTransform="Uppercase" VerticalOptions="Center" Grid.ColumnSpan="2" Padding="0,10,0,0" Text="{Binding BtnAddText, Mode=TwoWay}" Grid.Row="1" >
+
+            </Button>
+        </Grid>
+       
+
+    </Grid>
+</ContentPage>
+

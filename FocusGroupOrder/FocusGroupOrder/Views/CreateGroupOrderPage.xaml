@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:FocusGroupOrder.ViewModels" Title="Group Order"
+    x:Class="FocusGroupOrder.Views.CreateGroupOrderPage">
+    <ContentPage.BindingContext>
+        <viewmodels:CreateOrderViewModel/>
+    </ContentPage.BindingContext>
+    <ContentPage.Content>
+        <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *, Auto" Padding="5" x:DataType="viewmodels:CreateOrderViewModel">
+            <Label FontAttributes="Bold" FontSize="Large" Text="Create a Food order" HorizontalTextAlignment="Center" />
+
+             <Grid ColumnDefinitions="2*,*" Grid.Row="1" BackgroundColor="MediumPurple">
+                <Entry Text="{Binding CreatorEmail}" Placeholder="My Email" BackgroundColor="White" Margin="1" PlaceholderColor="Purple" TextColor="Purple"/>
+                <Button Grid.Column="1" Text="Add Me" Margin="1" BackgroundColor="Black" TextColor="Gold" Command="{Binding CommandAddMyself}" />
+            </Grid>
+
+             <Label FontAttributes="Bold,Italic" Grid.Row="2" FontSize="Large" Text="Invite others to order with you" HorizontalTextAlignment="Center" />
+
+            <Grid ColumnDefinitions="2*,*" Grid.Row="3">
+                <Entry Text="{Binding OtherEmail}" Placeholder="Email of person to invite" />
+                <Button Grid.Column="1" Text="Add" Command="{Binding CommandAddOtherUser}"  />
+            </Grid>
+
+            <Label FontAttributes="Bold" Grid.Row="4" FontSize="Micro" Padding="0,10,0,0" Text="Everyone on your order" HorizontalTextAlignment="Center" />
+            <ListView BackgroundColor="White" Grid.Row="5" VerticalScrollBarVisibility="Always" ItemsSource="{Binding Users}">
+                 <ListView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:GroupOrderUserViewModel">
+                    <TextCell Text="{Binding Email}" TextColor="{Binding TextColor}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+            </ListView>
+
+            <Button Grid.Row="6" Text="Start/Edit Order" Command="{Binding CommandStartOrder}" />
+
+            <ActivityIndicator HeightRequest="200" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy, Mode=TwoWay}" Grid.RowSpan="7" />
+
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>
